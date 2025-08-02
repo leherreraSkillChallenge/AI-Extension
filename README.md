@@ -140,7 +140,7 @@ graph TB
 ## 🚀 Tecnologías de IA Integradas
 
 ### **🧠 Modelos de Lenguaje**
-- **OpenRouter**: Acceso a múltiples LLMs (GPT-4, Claude, Gemini)
+- **OpenRouter**: Acceso a múltiples LLMs (gemma-3n-e4b-it:free,qwen2.5vl:7b,gemini-1.5-flash )
 - **Ollama Local**: Modelos locales para privacidad
 - **Multimodal APIs**: Procesamiento de imagen + texto
 - **Embedding Models**: Para búsqueda semántica

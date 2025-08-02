@@ -1,4 +1,4 @@
-# 🤖 Extensión IA - Asistente Web Inteligente
+# <img src="./icon16.png" alt="AI Assistant Icon" width="24" height="24"> Extensión IA - Asistente Web Inteligente
 
 Una **extensión de navegador revolucionaria** que integra múltiples tecnologías de **Inteligencia Artificial** para crear un asistente web completamente autónomo con capacidades de **reconocimiento de voz en tiempo real**, **análisis visual avanzado** y **síntesis de voz streaming**.
 
