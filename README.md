@@ -2,6 +2,14 @@
 
 Un **ecosistema revolucionario de inteligencia artificial** que combina **procesamiento multimodal avanzado** (voz, imagen y texto) para crear un asistente web completo. Integra múltiples tecnologías de IA de vanguardia en una solución empresarial robusta y escalable.
 
+IA Extension es un asistente de inteligencia artificial impulsado por agentes multimodales. Se trata de una extensión de navegador revolucionaria que integra múltiples tecnologías avanzadas de IA para crear un asistente web completamente autónomo. Entre sus capacidades destacan:
+
+Reconocimiento de voz en tiempo real.
+
+Análisis visual avanzado.
+
+Síntesis de voz en streaming.
+
 ## 🚀 Capacidades Multimodales Avanzadas
 
 ### 🎭 **Procesamiento Multimodal Simultáneo**
