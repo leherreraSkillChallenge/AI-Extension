@@ -1,6 +1,6 @@
-# 🤖 Asistente Web IA Multimodal - Ecosistema Completo
+# <img src="./AI Extension/icon16.png" alt="AI Assistant Icon" width="24" height="24"> Asistente Web IA Multimodal - Ecosistema Completo
 
-Un **ecosistema revolucionario de inteligencia artificial** que combina **procesamiento multimodal avanzado** (voz, imagen y texto) para crear el asistente web más completo y sofisticado disponible. Integra múltiples tecnologías de IA de vanguardia en una solución empresarial robusta y escalable.
+Un **ecosistema revolucionario de inteligencia artificial** que combina **procesamiento multimodal avanzado** (voz, imagen y texto) para crear un asistente web completo. Integra múltiples tecnologías de IA de vanguardia en una solución empresarial robusta y escalable.
 
 ## 🚀 Capacidades Multimodales Avanzadas
 
@@ -41,9 +41,10 @@ Un **ecosistema revolucionario de inteligencia artificial** que combina **proces
 │   • Voice Recognition│  • Task Queue      │   • Voice Processing │   • Embeddings  │
 │   • Screen Capture  │   • Error Handling  │   • LLM Integration │   • Memoria      │
 │                     │                     │                     │                   │
-│ 📱 Frontend Web     │ 🐳 Docker Stack    │ 🎤 TTS Service     │ 🗂️ File Storage │
-│   • Control Panel  │   • Container Mgmt  │   • Kokoro TTS      │   • Temp Files   │
-│   • Monitoring     │   • Auto Scaling    │   • Voice Synthesis │   • Cache        │
+│ 📱 Frontend Web     │ 🐳 Docker Stack    │ 🎤 TTS Services    │ 🗂️ File Storage │
+│   • Control Panel  │   • Container Mgmt  │   • ElevenLabs RT   │   • Temp Files   │
+│   • Monitoring     │   • Auto Scaling    │   • Kokoro Local    │   • Cache        │
+│                     │                     │   • Dual TTS Mode   │                   │
 └─────────────────────┴─────────────────────┴─────────────────────┴───────────────────┘
                                             │
                               ┌─────────────┴─────────────┐
@@ -84,6 +85,13 @@ graph TB
     E --> O
 ```
 
+### **Diagrama Visual del Flujo N8N**
+
+![Flujo de Procesamiento IA](./N8N/workflows/flujo.png)
+
+*Visualización del workflow implementado en N8N que orquesta todo el procesamiento multimodal del asistente*
+
+
 ## 🛠️ Componentes del Ecosistema
 
 ### 🌐 **[AI Extension](./AI%20Extension/) - Interfaz Multimodal**
@@ -114,12 +122,13 @@ graph TB
 - **Procesamiento multimodal** de contenido
 - **Memoria a largo plazo** contextual
 
-### 🎵 **[TTS](./TTS/) - Síntesis de Voz Neural**
-- **Modelo Kokoro** para español natural
-- **Streaming en tiempo real** sin latencia
-- **Múltiples voces** y estilos configurables
-- **Optimización de calidad** automática
-- **Integración con WebSockets**
+### 🎵 **[TTS](./TTS/) - Síntesis de Voz Neural Dual**
+- **Versión Streaming**: ElevenLabs WebSocket para tiempo real (< 200ms latencia)
+- **Versión Local**: Modelo Kokoro para privacidad y español natural
+- **Conmutación automática** según conectividad y preferencias
+- **Múltiples voces** y estilos configurables en ambas versiones
+- **Optimización de calidad** adaptativa según el modo seleccionado
+- **Fallback inteligente** entre versiones según disponibilidad
 
 ### 🌐 **[Frontend](./frontend/) - Panel de Control**
 - **Interfaz moderna** y responsive
@@ -137,16 +146,19 @@ graph TB
 - **Embedding Models**: Para búsqueda semántica
 
 ### **👁️ Visión por Computadora**
-- **YOLO/CNN**: Detección de objetos y elementos UI
-- **OCR Avanzado**: Tesseract + modelos neurales
-- **Análisis de Layout**: Comprensión de interfaces web
-- **Screenshot Processing**: Optimización automática
+- **Qwen2.5VL (7B/32B)**: Modelo multimodal avanzado para análisis de imágenes y OCR
+- **Gemini 1.5 Flash**: Modelo de Google para procesamiento visual rápido en la nube
+- **Ollama Vision Local**: Implementación local con modelos qwen2.5vl para privacidad
+- **LM Studio Integration**: Cliente especializado para análisis multimodal local
+- **ImageSharp Processing**: Redimensionamiento y validación automática de imágenes
+- **Análisis Contextual**: Comprensión de interfaces web, formularios y OCR integrado
 
 ### **🎤 Procesamiento de Audio**
-- **Web Speech API**: Reconocimiento de voz nativo
-- **ElevenLabs**: Síntesis de voz premium
-- **Kokoro TTS**: Modelo local español
-- **Audio Streaming**: WebSocket para baja latencia
+- **Web Speech API**: Reconocimiento de voz nativo del navegador
+- **ElevenLabs Streaming**: Síntesis en tiempo real vía WebSocket (versión premium)
+- **Kokoro TTS Local**: Modelo local español para privacidad (versión offline)
+- **Audio Streaming**: WebSocket para latencia ultra-baja (< 200ms)
+- **Dual TTS Architecture**: Conmutación automática entre cloud y local
 
 ### **🔗 Integración y Orquestación**
 - **N8N**: Automation visual workflows
