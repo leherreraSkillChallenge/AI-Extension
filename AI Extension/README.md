@@ -56,7 +56,7 @@ Una **extensión de navegador revolucionaria** que integra múltiples tecnologí
                     │                   │
                     │ • Webhook N8N     │
                     │ • ElevenLabs WS   │
-                    │ • OpenRouter API  │
+                    │ • Multimodal API  │
                     │ • ChromaDB        │
                     └───────────────────┘
 ```
