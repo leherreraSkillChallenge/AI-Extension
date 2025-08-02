@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "AI Extension",
+  "version": "1.0",
+  "description": "Tu asistente web flotante como extensión.",
+  "action": {
+    "default_popup": "index.html",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "host_permissions": [
+    "https://7d52d9431f3e.ngrok-free.app/*",
+    "<all_urls>"
+  ],
+  "permissions": ["tabs", "activeTab", "storage", "scripting"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["floating-widget.css"],
+      "run_at": "document_end"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["icon16.png"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

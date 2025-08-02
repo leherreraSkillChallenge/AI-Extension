@@ -12,13 +12,13 @@ Una **extensión de navegador revolucionaria** que integra múltiples tecnologí
 - **Filtros de ruido avanzados** con cancelación de eco y supresión de ruido
 - **Soporte multi-idioma** con preferencia español (es-ES)
 
-### 🔊 **Síntesis de Voz con Transmisión de Audio**
-- **Integración nativa con ElevenLabs WebSocket** para audio en tiempo real
-- **Reproducción instantánea** mediante fragmentos de audio streaming
-- **Calidad de audio superior** con modelos eleven_multilingual_v2
-- **Configuración dinámica** de velocidad, estabilidad y similitud
-- **Detección automática de formato** (MP3/WAV/PCM)
-- **Gestión inteligente de colas** para múltiples respuestas
+### 🔊 **Síntesis de Voz con Kokoro TTS**
+- **Integración con Kokoro TTS** a través de webhook HTTP
+- **Reproducción directa** de archivos MP3 generados por N8N
+- **Calidad de audio natural** con modelo Kokoro de alta fidelidad
+- **Configuración adaptativa** de velocidad y tono de voz
+- **Formato MP3 estándar** generado por N8N/Kokoro TTS
+- **Reproducción nativa** con elemento HTML audio de Chrome
 
 ### 👁️ **Análisis Visual Avanzado**
 - **Captura automática de pantalla** al activar comandos de voz
@@ -45,9 +45,9 @@ Una **extensión de navegador revolucionaria** que integra múltiples tecnologí
 │   Script Contenido │   Script Fondo      │   Script Popup  │
 │   (content.js)      │   (background.js)   │   (popup.js)    │
 ├─────────────────────┼─────────────────────┼─────────────────┤
-│ • Reconocimiento Voz│ • Gestor WebSocket  │ • Panel Control │
+│ • Reconocimiento Voz│ • Gestor HTTP       │ • Panel Control │
 │ • Análisis Visual   │ • Orquestación API  │ • Configuración │
-│ • Automatización UI │ • Transmisión Audio │ • Monitor Estado│
+│ • Automatización UI │ • Streaming Audio   │ • Monitor Estado│
 │ • Gestión Widget    │ • Comunicación Tabs │ • Acciones Rápidas │
 └─────────────────────┴─────────────────────┴─────────────────┘
                               │
@@ -55,7 +55,7 @@ Una **extensión de navegador revolucionaria** que integra múltiples tecnologí
                     │   APIs Externas   │
                     │                   │
                     │ • Webhook N8N     │
-                    │ • ElevenLabs WS   │
+                    │ • Kokoro TTS      │
                     │ • Multimodal API  │
                     │ • ChromaDB        │
                     └───────────────────┘
@@ -72,9 +72,9 @@ graph TD
     E --> F[Envío a N8N/IA]
     F --> G[Procesamiento LLM]
     G --> H[Respuesta Texto]
-    H --> I[WebSocket ElevenLabs]
-    I --> J[Transmisión Audio]
-    J --> K[Reproducción Tiempo Real]
+    H --> I[Kokoro TTS HTTP]
+    I --> J[Archivo MP3]
+    J --> K[Reproducción Chrome]
     K --> L[Reinicio Escucha]
 ```
 
@@ -100,23 +100,31 @@ navigator.mediaDevices.getUserMedia({
 });
 ```
 
-### **2. Transmisión WebSocket ElevenLabs**
+### **2. Integración HTTP con Kokoro TTS**
 ```javascript
-// Conexión WebSocket para audio en tiempo real
-const wsUrl = `wss://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}/stream-input?model_id=${MODEL_ID}`;
-const ws = new WebSocket(wsUrl);
-
-// Configuración de voz con IA
-const bosMessage = {
-  text: " ",
-  voice_settings: {
-    stability: 0.5,
-    similarity_boost: 0.5,
-    style: 0.0,
-    use_speaker_boost: true
-  },
-  xi_api_key: ELEVENLABS_API_KEY
+// Configuración HTTP para síntesis de voz
+const payload = {
+  UserText: userText.trim(),
+  imageBase64: base64Image || '',
+  emotion: "calmado",
+  ApiKey: userToken
 };
+
+// Envío a N8N con Kokoro TTS
+const response = await fetch(N8N_WEBHOOK_URL, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'audio/mpeg'
+  },
+  body: JSON.stringify(payload)
+});
+
+// Recibir archivo MP3 y reproducir
+const audioBlob = await response.blob();
+const audioUrl = URL.createObjectURL(audioBlob);
+audioPlayer.src = audioUrl;
+await audioPlayer.play();
 ```
 
 ### **3. API Chrome Extensions - Captura Visual**
@@ -152,16 +160,17 @@ chrome.tabs.captureVisibleTab(window.id, {
 ### **🔄 Gestión Inteligente de Estado**
 
 ```javascript
-// Sistema de colas para transmisión de audio
-let audioStreamingQueue = [];
-let isStreamingAudio = false;
-let streamingCompletelyFinished = false;
+// Sistema de reproducción de archivos MP3
+let isRequestActive = false;
+let isAudioPlaying = false;
+let isProcessing = false;
 
-// Calidad adaptativa de conexión
-function updateConnectionQuality(responseTime) {
-  if (responseTime < 3000) connectionQuality = 'rápida';
-  else if (responseTime < 8000) connectionQuality = 'media';
-  else connectionQuality = 'lenta';
+// Gestión de archivos MP3 desde N8N
+async function playAudioFromArrayBuffer(arrayBuffer) {
+  const audioBlob = new Blob([arrayBuffer], { type: 'audio/mpeg' });
+  const audioUrl = URL.createObjectURL(audioBlob);
+  audioPlayer.src = audioUrl;
+  await audioPlayer.play();
 }
 ```
 
@@ -178,8 +187,8 @@ function updateConnectionQuality(responseTime) {
 ### **Requisitos Técnicos**
 - **Navegador**: Chrome/Edge/Brave (Manifest V3)
 - **Permisos**: Micrófono, captura de pantallas, almacenamiento
-- **APIs Externas**: ElevenLabs, N8N, OpenRouter
-- **Conectividad**: Compatible con WebSocket
+- **APIs Externas**: Kokoro TTS, N8N, OpenRouter
+- **Conectividad**: HTTP/HTTPS para archivos MP3
 
 ### **Instalación en Modo Desarrollador**
 
@@ -196,21 +205,20 @@ cd "AI Extension"
    - Seleccionar la carpeta `AI Extension`
 
 3. **Configurar APIs**:
-   - Obtener clave API de ElevenLabs
-   - Configurar webhook N8N
+   - Configurar webhook N8N con Kokoro TTS
    - Actualizar URLs en `manifest.json`
+   - Verificar conectividad HTTP
 
 ### **Estructura de Archivos**
 
 ```
 AI Extension/
 ├── 📄 manifest.json         # Configuración Manifest V3
-├── 🎯 content.js            # Script principal (2000+ líneas)
-├── 🔧 background.js         # Service Worker WebSocket
+├── 🎯 content.js            # Script principal (1500+ líneas)
+├── 🔧 background.js         # Service Worker HTTP
 ├── 🎮 popup.js              # Panel de control
 ├── 🎨 floating-widget.css   # Estilos del widget flotante
-├── ✨ icon-animado.css      # Animaciones avanzadas
-├── 🖼️ icon128.png           # Iconos de alta resolución
+├── 🖼️ icon128.png           # Iconos múltiples resoluciones
 ├── 📱 index.html            # Interfaz popup
 └── 🎨 style.css             # Estilos generales
 ```
@@ -219,7 +227,7 @@ AI Extension/
 
 ### **Optimizaciones de IA**
 - **Detección de pausa inteligente**: 800ms para respuesta ultra-rápida
-- **Transmisión de audio**: Reproducción inmediata sin esperar descarga completa
+- **Reproducción MP3 directa**: Archivos de audio completos desde N8N
 - **Calidad adaptativa**: Tiempos de espera dinámicos según velocidad de conexión
 - **Caché inteligente**: Reutilización de configuraciones y tokens
 - **Limpieza automática**: Gestión de memoria para sesiones largas
@@ -227,7 +235,7 @@ AI Extension/
 ### **Métricas de Rendimiento**
 - ⚡ **Tiempo de respuesta**: < 3 segundos (conexión rápida)
 - 🎙️ **Latencia de voz**: < 100ms (reconocimiento)
-- 🔊 **Inicio de audio**: < 200ms (transmisión)
+- 🔊 **Inicio de audio**: < 800ms (descarga MP3)
 - 💾 **Uso de memoria**: < 50MB promedio
 - 🌐 **Compatibilidad**: 95%+ navegadores modernos
 
@@ -235,19 +243,19 @@ AI Extension/
 
 ### **Protección de Datos**
 - **Tokens únicos** por máquina usando `crypto.randomUUID()`
-- **Transmisión cifrada** (HTTPS/WSS únicamente)
+- **Transmisión cifrada** (HTTPS únicamente)
 - **Sin almacenamiento local** de audio o imágenes sensibles
 - **Limpieza automática** de URLs temporales
 - **Validación de entrada** contra inyección de código
 
-### **Permisos Mínimos**
+### **Permisos Reales**
 ```json
 {
   "permissions": ["tabs", "activeTab", "storage", "scripting"],
   "host_permissions": ["<all_urls>"],
-  "externally_connectable": {
-    "matches": ["<all_urls>"]
+  "background": {
+    "service_worker": "background.js"
   }
 }
 ```
-**🌟 Esta extensión representa el estado del arte en asistentes web con IA, combinando reconocimiento de voz en tiempo real, análisis visual avanzado y síntesis de voz streaming para crear una experiencia de usuario verdaderamente revolucionaria.**
+**🌟 Esta extensión representa el estado del arte en asistentes web con IA, combinando reconocimiento de voz en tiempo real, análisis visual avanzado y síntesis de voz con Kokoro TTS para crear una experiencia de usuario verdaderamente revolucionaria.**
