@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # Contenedor cliente que usa los servicios
+  client-example:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    container_name: chroma-client
+    depends_on:
+      - chroma
+      - chroma-service
+    networks:
+      - chroma-net  # Usa tu red existente
+    environment:
+      - CHROMA_SERVICE_URL=http://chroma-service:9000
+      - CHROMADB_URL=http://chromadb:8000
+
+  chroma:
+    image: chromadb/chroma:latest
+    container_name: chromadb
+    networks:
+      - chroma-net
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      - ANONYMIZED_TELEMETRY=False
+
+  chroma-service:
+    build: .
+    container_name: chroma-service
+    depends_on:
+      - chroma
+    networks:
+      - chroma-net
+    environment:
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000
+
+volumes:
+  chroma_data:
+    driver: local
+
+networks:
+  chroma-net:
+    external: true

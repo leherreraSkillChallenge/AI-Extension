@@ -1,0 +1,26 @@
+services:
+  tts-proxy:
+    build: .
+    ports:
+      - "5100:5100"
+    environment:
+      - KOKORO_HOST=host.docker.internal
+      - KOKORO_PORT=8880
+      - FLASK_ENV=production
+    restart: unless-stopped
+    # Usar la red del host para conectarse al servidor Kokoro TTS externo
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5100/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    # Límites de recursos para evitar consumo excesivo
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M

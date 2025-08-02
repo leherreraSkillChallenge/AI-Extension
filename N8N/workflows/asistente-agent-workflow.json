@@ -1,0 +1,528 @@
+{
+  "name": "asistente-agent-workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "asistente-agent",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "f5224b2d-2575-497c-a2f6-37f48358948a",
+      "name": "Webhook - Entrada del Agente",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -1424,
+        208
+      ],
+      "webhookId": "asistente-agent-webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.imageBase64}}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "35d36c58-5af3-49bc-9678-7ced52cfe2a6",
+      "name": "¿Tiene Imagen?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -1168,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Combinar información de imagen y RAG para crear contexto completo\nconst inputs = $input.all();\nlet userData = inputs[0].json;\nlet imageAnalysis = '';\nlet UserText = '';\n\n\n// Buscar análisis de imagen\n\nimageAnalysis = userData.result\n;\n\nreturn {\n  imageAnalysis,\n};"
+      },
+      "id": "9150d402-5338-4d31-a25a-48fc34a9f635",
+      "name": "Combinar Contexto",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -752,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://tts-service:5100/tts",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "={{ $json.result }}"
+            },
+            {
+              "name": "emotion",
+              "value": "calmado"
+            },
+            {
+              "name": "voice",
+              "value": "af_sky"
+            },
+            {
+              "name": "response_format",
+              "value": "mp3"
+            },
+            {
+              "name": "speed",
+              "value": "1.0"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "b2b4b153-b6e0-4955-8919-133584981556",
+      "name": "Generar TTS",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        80,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "binary",
+        "options": {}
+      },
+      "id": "51fcabf0-46fc-4ca9-bbd5-3e668c9bf051",
+      "name": "Respuesta del Agente",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        448,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://asistente-webapi:5000/api/ask-ai",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "ImageAnalysis",
+              "value": "={{ $('Simple Memory').item.json.imageAnalysis }}"
+            },
+            {
+              "name": "UserText",
+              "value": "={{ $json.webhookData.body.userText ? $json.webhookData.body.userText : $json.memory[0].user }}"
+            },
+            {
+              "name": "ApiKey",
+              "value": "={{ $('Webhook - Entrada del Agente').item.json.body.ApiKey }}"
+            },
+            {
+              "name": "MemoryItem",
+              "value": "={{ $json.memory[0] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -576,
+        336
+      ],
+      "id": "28881929-c7ef-4365-8583-40d8e31c9120",
+      "name": "ask-ai"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Nodo Simple Memory: guarda y recupera historial de la sesión (por sessionId)\nconst webhookData = $('Webhook - Entrada del Agente').item.json;\nconst sessionId = webhookData.body?.sessionId || 'default';\n\n// Usar variables de entorno o memoria temporal del workflow\n// Para una implementación simple, usaremos una variable global temporal\nif (typeof global.memoryStorage === 'undefined') {\n  global.memoryStorage = {};\n}\n\nlet memory = global.memoryStorage[sessionId] || [];\n\n// Añadir el nuevo mensaje del usuario\nconst newMessage = {\n  timestamp: new Date().toISOString(),\n  user: webhookData.body?.UserText || '',\n};\n\nmemory.push(newMessage);\n\n// Mantener solo los últimos 10 mensajes para evitar que crezca indefinidamente\nif (memory.length > 10) {\n  memory = memory.slice(-10);\n}\n\n// Guardar el historial actualizado\nglobal.memoryStorage[sessionId] = memory;\n\n// Verificar si hay análisis de imagen disponible\n// Solo intentar obtenerlo si venimos del nodo \"Combinar Contexto\"\nlet imageAnalysis = '';\nif ($json.imageAnalysis !== undefined) {\n  imageAnalysis = $json.imageAnalysis;\n}\n\n// Pasar el historial al siguiente nodo junto con los datos\nreturn {\n  memory,\n  imageAnalysis,\n  webhookData\n};"
+      },
+      "id": "5ecfd0ff-aa6c-4aa3-9b49-9e7f18dcbec7",
+      "name": "Simple Memory",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -576,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://asistente-webapi:5000/api/store-memory",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "ImageAnalysis",
+              "value": "={{ $('Simple Memory').item.json.imageAnalysis }}"
+            },
+            {
+              "name": "UserText",
+              "value": "={{ $json.webhookData.body.userText ? $json.webhookData.body.userText : $json.memory[0].user }}"
+            },
+            {
+              "name": "UserToken",
+              "value": "={{ $('Webhook - Entrada del Agente').item.json.body.ApiKey }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -368,
+        0
+      ],
+      "id": "b2422bee-cf6f-44f5-a734-9fc18113f6d3",
+      "name": "Persistent_Memory"
+    },
+    {
+      "parameters": {
+        "content": "## •\tHistorial de Conversación",
+        "height": 272,
+        "width": 432,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -624,
+        -80
+      ],
+      "typeVersion": 1,
+      "id": "78f9104c-5d74-4ef1-8061-97c874166792",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## •\tServicios TTS Kokoro",
+        "height": 272,
+        "width": 352,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -32,
+        304
+      ],
+      "typeVersion": 1,
+      "id": "d493697c-a1be-4bfb-a959-15e0439f92ef",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://asistente-webapi:5000/api/analyze-image-gemini",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "Base64Image",
+              "value": "={{ $json.body.imageBase64 ? $json.body.imageBase64 : $json.body.base64Image }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -864,
+        336
+      ],
+      "id": "4433d260-05de-45c5-b5a3-df10683b6be4",
+      "name": "analyze-image"
+    },
+    {
+      "parameters": {
+        "content": "## •\tMultimodal •\tAnálisis Semántico •\tContexto de Imagen: \n",
+        "height": 272,
+        "width": 592,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -976,
+        240
+      ],
+      "typeVersion": 1,
+      "id": "9661363e-921a-4016-8973-97f230c33005",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Capacidades de IA Avanzada\n•\tMultimodal: Entiende texto, imágenes y audio a la vez.\n•\tAnálisis Semántico: Lee manuales y entiende el significado real, no solo palabras clave.\n•\tHistorial de Conversación: Recuerda interacciones pasadas para dar respuestas coherentes.\n•\tContexto de Imagen: \"Ve\" y analiza el contenido de una imagen para discutirla.\n",
+        "width": 672,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1520,
+        -128
+      ],
+      "typeVersion": 1,
+      "id": "fbd64d5c-cb5d-4581-bdf4-5342241ec286",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.elevenlabs.io/v1/text-to-speech/OOBuy7AOSgH5XKvgkm4n",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "xi-api-key",
+              "value": "qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"
+            },
+            {
+              "name": "speed",
+              "value": "0.98"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "={{ $json.result }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        96,
+        720
+      ],
+      "id": "a1c97c73-8eb2-453c-92ee-cd2643898a80",
+      "name": "IIElevenLabs"
+    },
+    {
+      "parameters": {
+        "content": "## •\tHTTP IIElevenLabs",
+        "height": 272,
+        "width": 352,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -32,
+        608
+      ],
+      "typeVersion": 1,
+      "id": "c1e610d8-2204-4c08-804b-f1126ebf8561",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "functionCode": "const cleanedResult = items[0].json.result\n  .replace(/\\n/g, '\\\\n')  // Escapar saltos de línea\n  .replace(/\\r/g, '\\\\r'); // Escapar retornos de carro\n\nreturn [{\n  json: {\n    result: cleanedResult\n  }\n}];"
+      },
+      "id": "0a0b124d-5d8a-45c8-953a-09cc57689756",
+      "name": "Ajustar Retorno",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        80,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "// 1. Obtener datos de entrada\nconst response = $json.result || '';\nconst userApiKey = $('Webhook - Entrada del Agente').item.json.body?.ApiKey || 'default';\n\n// 2. Inicializar almacén global si no existe\nif (typeof global.greetingStorage === 'undefined') {\n  global.greetingStorage = {};\n}\n\n// 3. Verificar si ya se saludó a este ApiKey\nconst hasGreeted = global.greetingStorage[userApiKey] || false;\n\n// 4. Patrones de saludo\nconst greetingPatterns = [\n  /^[¡!,.]?Hola[¡!,.]?\\s*/i,\n  /^[¡!,.]?Buenos días[¡!,.]?\\s*/i,\n  /^[¡!,.]?Buenas tardes[¡!,.]?\\s*/i,\n  /^[¡!,.]?Buenas noches[¡!,.]?\\s*/i,\n  /^[¡!,.]?Buenas[¡!,.]?\\s*/i,\n  /^[¡!,.]?Hello[¡!,.]?\\s*/i,\n  /^[¡!,.]?Hi[¡!,.]?\\s*/i,\n  /^[¡!,.]?Hey[¡!,.]?\\s*/i,\n  /^[¡!,.]?Saludos[¡!,.]?\\s*/i,\n  /^Qué tal[¡!,.]?\\s*/i,\n  /^¿Cómo estás\\??[¡!,.]?\\s*/i,\n  /^¿Qué tal\\??[¡!,.]?\\s*/i\n];\n\nlet filteredResponse = response;\nconst originalResponse = response;\n\n// 5. Aplicar el filtro siempre\nfor (const pattern of greetingPatterns) {\n  if (pattern.test(filteredResponse)) {\n      filteredResponse = filteredResponse.replace(pattern, '').trim();\n  }\n}\n\n// 6. Lógica adicional solo para interacciones POSTERIORES\nif (hasGreeted) {\n  // Si después del filtrado queda muy poco contenido, usar respuesta genérica.\n  // Esto evita enviar respuestas vacías o casi vacías en turnos avanzados.\n  if (filteredResponse.length < 15) {\n    filteredResponse = \"¿En qué más puedo ayudarte?\";\n  }\n}\n\n// 7. Marcar siempre al usuario como saludado para la próxima ejecución\nglobal.greetingStorage[userApiKey] = true;\n\n// 8. Retornar el resultado\nreturn {\n  result: filteredResponse,\n  originalResult: originalResponse,\n  wasFiltered: originalResponse !== filteredResponse,\n  userApiKey: userApiKey,\n  greetingStatus: hasGreeted ? 'subsequent_interaction' : 'first_interaction'\n};"
+      },
+      "id": "4a2fd91a-1d0b-44ef-bf6e-d2417e9fd435",
+      "name": "Filtrar Saludos",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"result\": $json.result } }}",
+        "options": {}
+      },
+      "id": "24c6c256-fe01-4a6d-84aa-7a853adc7805",
+      "name": "Respuesta WebSocket",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        448,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## •\tIIElevenLabs WebSocket",
+        "height": 272,
+        "width": 352,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -32,
+        0
+      ],
+      "typeVersion": 1,
+      "id": "41c54855-d4e0-4f8e-a519-fe4f0b177be1",
+      "name": "Sticky Note5"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook - Entrada del Agente": {
+      "main": [
+        [
+          {
+            "node": "¿Tiene Imagen?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Tiene Imagen?": {
+      "main": [
+        [
+          {
+            "node": "Simple Memory",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "analyze-image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combinar Contexto": {
+      "main": [
+        [
+          {
+            "node": "Simple Memory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "main": [
+        [
+          {
+            "node": "ask-ai",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Persistent_Memory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generar TTS": {
+      "main": [
+        [
+          {
+            "node": "Respuesta del Agente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ask-ai": {
+      "main": [
+        [
+          {
+            "node": "Filtrar Saludos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "analyze-image": {
+      "main": [
+        [
+          {
+            "node": "Combinar Contexto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IIElevenLabs": {
+      "main": [
+        [
+          {
+            "node": "Respuesta del Agente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ajustar Retorno": {
+      "main": [
+        [
+          {
+            "node": "Respuesta WebSocket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar Saludos": {
+      "main": [
+        [
+          {
+            "node": "Ajustar Retorno",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "309fdb02-fd0b-4404-b98a-b865e0e6354e",
+  "meta": {
+    "instanceId": "ae032d5c69127f2ce3f17aad5404096044bc50d0a2ee12f9c5c5e8b3155b05b4"
+  },
+  "id": "zRJickLF9pkpl6Ky",
+  "tags": []
+}

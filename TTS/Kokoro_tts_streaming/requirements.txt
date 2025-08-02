@@ -1,0 +1,7 @@
+torch
+soundfile
+flask
+omegaconf
+requests
+flask_cors
+gunicorn

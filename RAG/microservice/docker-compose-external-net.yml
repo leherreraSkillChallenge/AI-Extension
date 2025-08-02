@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  chroma:
+    image: chromadb/chroma:latest
+    container_name: chromadb
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      - ANONYMIZED_TELEMETRY=False
+    networks:
+      - chroma-net  # Usando tu red existente
+    restart: unless-stopped
+
+  chroma-service:
+    build: .
+    container_name: chroma-service
+    ports:
+      - "9000:9000"
+    depends_on:
+      - chroma
+    networks:
+      - chroma-net  # Usando tu red existente
+    restart: unless-stopped
+    environment:
+      - CHROMA_HOST=chroma
+      - CHROMA_PORT=8000
+
+volumes:
+  chroma_data:
+    driver: local
+
+networks:
+  chroma-net:
+    external: true  # Usa la red existente

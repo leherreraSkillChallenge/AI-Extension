@@ -1,0 +1,11 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Instalar dependencias
+RUN pip install requests chromadb
+
+# Script de ejemplo para usar los servicios
+COPY client_simple.py .
+
+CMD ["python", "client_simple.py"]

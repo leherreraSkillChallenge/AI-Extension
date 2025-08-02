@@ -1,0 +1,48 @@
+# Build outputs
+bin/
+obj/
+dist/
+build/
+
+# Dependencies
+node_modules/
+packages/
+
+# Logs
+*.log
+logs/
+
+# Environment files
+*.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+appsettings.secrets.json
+
+# IDE files
+.vs/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+imagenes_temp/
+
+# Cache
+.cache/
+*.cache
+
+# Docker
+.dockerignore
+
+# Sensitive data
+*.key
+*.pem
+secrets/

@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n-asistente-agent
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=${N8N_USER:-admin}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_PASSWORD:-change_this_password}
+      - WEBHOOK_URL=http://localhost:5678
+      - GENERIC_TIMEZONE=America/Bogota
+      - N8N_SECURE_COOKIE=false
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./workflows:/home/node/.n8n/workflows
+    networks:
+      - chroma-net
+    restart: unless-stopped
+
+  # Servicio Redis para cola de trabajos del agente
+  redis:
+    image: redis:7-alpine
+    container_name: redis-asistente-agent
+    ports:
+      - "6379:6379"
+    networks:
+      - chroma-net
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+
+volumes:
+  n8n_data:
+  redis_data:
+
+networks:
+  chroma-net:
+    external: true

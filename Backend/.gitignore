@@ -1,0 +1,39 @@
+# Archivos sensibles y secretos
+.env
+*.secrets.json
+appsettings.secrets.json
+
+# Archivos temporales y de compilación
+bin/
+obj/
+*.dll
+*.exe
+*.pdb
+*.log
+
+# Dependencias
+node_modules/
+packages/
+
+# IDE
+.vs/
+.vscode/
+*.suo
+*.user
+*.userprefs
+
+# Archivos de base de datos local
+*.db
+*.sqlite
+
+# Archivos de respaldo
+*.bak
+*.backup
+*~
+
+# N8N específico
+N8N/.env
+N8N/n8n_data/
+
+# Docker
+docker-compose.override.yml
