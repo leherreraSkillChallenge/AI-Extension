@@ -1,4 +1,4 @@
-# 🤖 AI Extension - Asistente Web Inteligente
+# 🤖 Extensión IA - Asistente Web Inteligente
 
 Una **extensión de navegador revolucionaria** que integra múltiples tecnologías de **Inteligencia Artificial** para crear un asistente web completamente autónomo con capacidades de **reconocimiento de voz en tiempo real**, **análisis visual avanzado** y **síntesis de voz streaming**.
 
@@ -9,25 +9,25 @@ Una **extensión de navegador revolucionaria** que integra múltiples tecnologí
 - **Procesamiento inmediato** de comandos sin necesidad de botones
 - **Detección inteligente de pausas** para optimizar la respuesta
 - **Calidad adaptativa** según la conexión de red
-- **Filtros de ruido avanzados** con echoCancellation y noiseSuppression
+- **Filtros de ruido avanzados** con cancelación de eco y supresión de ruido
 - **Soporte multi-idioma** con preferencia español (es-ES)
 
-### 🔊 **Síntesis de Voz con Streaming de Audio**
+### 🔊 **Síntesis de Voz con Transmisión de Audio**
 - **Integración nativa con ElevenLabs WebSocket** para audio en tiempo real
-- **Reproducción instantánea** mediante chunks de audio streaming
+- **Reproducción instantánea** mediante fragmentos de audio streaming
 - **Calidad de audio superior** con modelos eleven_multilingual_v2
 - **Configuración dinámica** de velocidad, estabilidad y similitud
 - **Detección automática de formato** (MP3/WAV/PCM)
-- **Queue management inteligente** para múltiples respuestas
+- **Gestión inteligente de colas** para múltiples respuestas
 
 ### 👁️ **Análisis Visual Avanzado**
 - **Captura automática de pantalla** al activar comandos de voz
 - **Procesamiento con IA visual** para contexto de la página
-- **Detección de elementos UI** (formularios, botones, campos)
+- **Detección de elementos de interfaz** (formularios, botones, campos)
 - **OCR integrado** para lectura de texto en imágenes
-- **Análisis de layout** para navegación inteligente
+- **Análisis de diseño** para navegación inteligente
 
-### 🧠 **Procesamiento de Lenguaje Natural (NLP)**
+### 🧠 **Procesamiento de Lenguaje Natural (PLN)**
 - **Clasificación automática de comandos** (locales vs. IA)
 - **Comprensión contextual** basada en el contenido visual
 - **Ejecución de herramientas locales** para tareas comunes
@@ -40,23 +40,23 @@ Una **extensión de navegador revolucionaria** que integra múltiples tecnologí
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    AI Extension                              │
+│                   Extensión IA                              │
 ├─────────────────────┬─────────────────────┬─────────────────┤
-│   Content Script    │   Background Script │   Popup Script  │
+│   Script Contenido │   Script Fondo      │   Script Popup  │
 │   (content.js)      │   (background.js)   │   (popup.js)    │
 ├─────────────────────┼─────────────────────┼─────────────────┤
-│ • Voice Recognition │ • WebSocket Manager │ • Control Panel │
-│ • Visual Analysis   │ • API Orchestration │ • Configuration │
-│ • UI Automation     │ • Audio Streaming   │ • Status Monitor│
-│ • Widget Management │ • Tab Communication │ • Quick Actions │
+│ • Reconocimiento Voz│ • Gestor WebSocket  │ • Panel Control │
+│ • Análisis Visual   │ • Orquestación API  │ • Configuración │
+│ • Automatización UI │ • Transmisión Audio │ • Monitor Estado│
+│ • Gestión Widget    │ • Comunicación Tabs │ • Acciones Rápidas │
 └─────────────────────┴─────────────────────┴─────────────────┘
                               │
                     ┌─────────┴─────────┐
-                    │   External APIs   │
+                    │   APIs Externas   │
                     │                   │
-                    │ • N8N Webhook     │
+                    │ • Webhook N8N     │
                     │ • ElevenLabs WS   │
-                    │ • OpenRouter API  │
+                    │ • API OpenRouter  │
                     │ • ChromaDB        │
                     └───────────────────┘
 ```
@@ -65,22 +65,22 @@ Una **extensión de navegador revolucionaria** que integra múltiples tecnologí
 
 ```mermaid
 graph TD
-    A[Voz Usuario] --> B[Web Speech API]
-    B --> C{Comando Local?}
+    A[Voz Usuario] --> B[API Web Speech]
+    B --> C{¿Comando Local?}
     C -->|Sí| D[Ejecución Directa]
     C -->|No| E[Captura Pantalla]
     E --> F[Envío a N8N/IA]
     F --> G[Procesamiento LLM]
     G --> H[Respuesta Texto]
-    H --> I[ElevenLabs WebSocket]
-    I --> J[Streaming Audio]
+    H --> I[WebSocket ElevenLabs]
+    I --> J[Transmisión Audio]
     J --> K[Reproducción Tiempo Real]
-    K --> L[Reinicio Listening]
+    K --> L[Reinicio Escucha]
 ```
 
 ## 🛠️ Tecnologías de IA Integradas
 
-### **1. Web Speech API - Reconocimiento de Voz**
+### **1. API Web Speech - Reconocimiento de Voz**
 ```javascript
 // Configuración avanzada del reconocimiento
 recognition = new SpeechRecognition();
@@ -100,7 +100,7 @@ navigator.mediaDevices.getUserMedia({
 });
 ```
 
-### **2. ElevenLabs WebSocket Streaming**
+### **2. Transmisión WebSocket ElevenLabs**
 ```javascript
 // Conexión WebSocket para audio en tiempo real
 const wsUrl = `wss://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}/stream-input?model_id=${MODEL_ID}`;
@@ -119,7 +119,7 @@ const bosMessage = {
 };
 ```
 
-### **3. Chrome Extensions API - Captura Visual**
+### **3. API Chrome Extensions - Captura Visual**
 ```javascript
 // Captura de pantalla con contexto
 chrome.tabs.captureVisibleTab(window.id, {
@@ -137,7 +137,7 @@ chrome.tabs.captureVisibleTab(window.id, {
 
 #### **Herramientas Locales (Ejecución Instantánea)**
 - `"Escribe [texto]"` - Autocompletado inteligente de formularios
-- `"Selecciona [opción]"` - Navegación inteligente en dropdowns
+- `"Selecciona [opción]"` - Navegación inteligente en menús desplegables
 - `"Siguiente campo"` - Movimiento automático entre campos
 - `"Enviar formulario"` - Detección y envío automático
 - `"Elimina espacios"` - Limpieza automática de campos
@@ -152,16 +152,16 @@ chrome.tabs.captureVisibleTab(window.id, {
 ### **🔄 Gestión Inteligente de Estado**
 
 ```javascript
-// Sistema de colas para audio streaming
+// Sistema de colas para transmisión de audio
 let audioStreamingQueue = [];
 let isStreamingAudio = false;
 let streamingCompletelyFinished = false;
 
 // Calidad adaptativa de conexión
 function updateConnectionQuality(responseTime) {
-  if (responseTime < 3000) connectionQuality = 'fast';
-  else if (responseTime < 8000) connectionQuality = 'medium';
-  else connectionQuality = 'slow';
+  if (responseTime < 3000) connectionQuality = 'rápida';
+  else if (responseTime < 8000) connectionQuality = 'media';
+  else connectionQuality = 'lenta';
 }
 ```
 
@@ -170,16 +170,16 @@ function updateConnectionQuality(responseTime) {
 - **Widget arrastrable** con persistencia de posición
 - **Indicadores visuales** de estado del procesamiento de IA
 - **Ondas de audio animadas** durante síntesis de voz
-- **Feedback en tiempo real** del reconocimiento de voz
-- **Adaptación responsive** a diferentes resoluciones
+- **Retroalimentación en tiempo real** del reconocimiento de voz
+- **Adaptación responsiva** a diferentes resoluciones
 
-## 🔧 Configuración y Instalación
+## 🔧 Configuración e Instalación
 
 ### **Requisitos Técnicos**
 - **Navegador**: Chrome/Edge/Brave (Manifest V3)
 - **Permisos**: Micrófono, captura de pantallas, almacenamiento
 - **APIs Externas**: ElevenLabs, N8N, OpenRouter
-- **Conectividad**: WebSocket compatible
+- **Conectividad**: Compatible con WebSocket
 
 ### **Instalación en Modo Desarrollador**
 
@@ -192,11 +192,11 @@ cd "AI Extension"
 2. **Cargar en Chrome**:
    - Abrir `chrome://extensions/`
    - Activar "Modo de desarrollador"
-   - Clic en "Cargar extensión sin empaquetar"
+   - Hacer clic en "Cargar extensión sin empaquetar"
    - Seleccionar la carpeta `AI Extension`
 
 3. **Configurar APIs**:
-   - Obtener API key de ElevenLabs
+   - Obtener clave API de ElevenLabs
    - Configurar webhook N8N
    - Actualizar URLs en `manifest.json`
 
@@ -204,14 +204,14 @@ cd "AI Extension"
 
 ```
 AI Extension/
-├── 📄 manifest.json          # Configuración Manifest V3
+├── 📄 manifest.json         # Configuración Manifest V3
 ├── 🎯 content.js            # Script principal (2000+ líneas)
 ├── 🔧 background.js         # Service Worker WebSocket
 ├── 🎮 popup.js              # Panel de control
 ├── 🎨 floating-widget.css   # Estilos del widget flotante
 ├── ✨ icon-animado.css      # Animaciones avanzadas
 ├── 🖼️ icon128.png           # Iconos de alta resolución
-├── 📱 index.html            # Popup interface
+├── 📱 index.html            # Interfaz popup
 └── 🎨 style.css             # Estilos generales
 ```
 
@@ -219,15 +219,15 @@ AI Extension/
 
 ### **Optimizaciones de IA**
 - **Detección de pausa inteligente**: 800ms para respuesta ultra-rápida
-- **Streaming de audio**: Reproducción inmediata sin esperar descarga completa
-- **Calidad adaptativa**: Timeouts dinámicos según velocidad de conexión
-- **Cache inteligente**: Reutilización de configuraciones y tokens
+- **Transmisión de audio**: Reproducción inmediata sin esperar descarga completa
+- **Calidad adaptativa**: Tiempos de espera dinámicos según velocidad de conexión
+- **Caché inteligente**: Reutilización de configuraciones y tokens
 - **Limpieza automática**: Gestión de memoria para sesiones largas
 
 ### **Métricas de Rendimiento**
 - ⚡ **Tiempo de respuesta**: < 3 segundos (conexión rápida)
 - 🎙️ **Latencia de voz**: < 100ms (reconocimiento)
-- 🔊 **Inicio de audio**: < 200ms (streaming)
+- 🔊 **Inicio de audio**: < 200ms (transmisión)
 - 💾 **Uso de memoria**: < 50MB promedio
 - 🌐 **Compatibilidad**: 95%+ navegadores modernos
 
@@ -235,8 +235,8 @@ AI Extension/
 
 ### **Protección de Datos**
 - **Tokens únicos** por máquina usando `crypto.randomUUID()`
-- **Transmisión encriptada** (HTTPS/WSS únicamente)
-- **No almacenamiento local** de audio o imágenes sensibles
+- **Transmisión cifrada** (HTTPS/WSS únicamente)
+- **Sin almacenamiento local** de audio o imágenes sensibles
 - **Limpieza automática** de URLs temporales
 - **Validación de entrada** contra inyección de código
 
@@ -250,61 +250,4 @@ AI Extension/
   }
 }
 ```
-
-## 📊 Casos de Uso Empresariales
-
-### **🏢 Productividad Corporativa**
-- **Autocompletado masivo** de formularios empresariales
-- **Navegación por voz** en sistemas complejos
-- **Asistencia contextual** en aplicaciones web internas
-- **Documentación automática** de procesos
-
-### **🎓 Accesibilidad Avanzada**
-- **Navegación sin manos** para usuarios con discapacidades
-- **Lectura de pantalla** mejorada con IA
-- **Comandos de voz** para interfaces complejas
-- **Automatización de tareas** repetitivas
-
-### **🔧 Desarrollo y Testing**
-- **Pruebas automatizadas** por comandos de voz
-- **Debugging interactivo** de interfaces
-- **Documentación automática** de flujos de usuario
-- **Análisis de usabilidad** en tiempo real
-
-## 🎯 Roadmap de Desarrollo
-
-### **Próximas Funcionalidades de IA**
-- [ ] **Reconocimiento de gestos** con cámara web
-- [ ] **Análisis de sentimientos** en tiempo real
-- [ ] **Traducción automática** multi-idioma
-- [ ] **Integración con ChatGPT/Claude** nativa
-- [ ] **Aprendizaje personalizado** de comandos de usuario
-- [ ] **Automatización de workflows** complejos
-
-### **Mejoras Técnicas**
-- [ ] **Offline mode** con modelos locales
-- [ ] **Sincronización multi-dispositivo**
-- [ ] **API pública** para desarrolladores
-- [ ] **Plugin system** extensible
-- [ ] **Métricas avanzadas** y analytics
-
----
-
-## 👨‍💻 Desarrollo
-
-**Desarrollado por**: Equipo de Desarrollo Indra Colombia  
-**Última actualización**: 02/08/2025  
-**Versión**: 1.0.0  
-**Licencia**: Propietaria  
-
-### **Contribuir**
-Para contribuir al desarrollo:
-1. Fork del repositorio
-2. Crear rama feature (`git checkout -b feature/nueva-funcionalidad`)
-3. Commit de cambios (`git commit -am 'Agregar nueva funcionalidad'`)
-4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
-5. Crear Pull Request
-
----
-
 **🌟 Esta extensión representa el estado del arte en asistentes web con IA, combinando reconocimiento de voz en tiempo real, análisis visual avanzado y síntesis de voz streaming para crear una experiencia de usuario verdaderamente revolucionaria.**
